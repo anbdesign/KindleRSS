@@ -1,0 +1,42 @@
+<%- include('layout') %>
+
+<h1><%= feed.title %></h1>
+
+<% if (feed.description) { %>
+  <p><%= feed.description %></p>
+<% } %>
+
+<% if (feed.link) { %>
+  <p><strong>Website:</strong> <a href="<%= feed.link %>" target="_blank"><%= feed.link %></a></p>
+<% } %>
+
+<h2>Articles (<%= feed.items.length %>)</h2>
+
+<ul class="article-list">
+  <% feed.items.forEach((item, index) => { %>
+    <li class="article-item">
+      <div class="article-title">
+        <a href="/article/<%= encodeURIComponent(feedUrl) %>/<%= index %>"><%= item.title %></a>
+      </div>
+      
+      <div class="article-meta">
+        <% if (item.pubDate) { %>
+          Published: <%= new Date(item.pubDate).toLocaleDateString() %>
+        <% } %>
+        <% if (item.creator) { %>
+          | By: <%= item.creator %>
+        <% } %>
+      </div>
+      
+      <% if (item.contentSnippet) { %>
+        <div class="article-summary">
+          <%= item.contentSnippet.substring(0, 200) %><% if (item.contentSnippet.length > 200) { %>...<% } %>
+        </div>
+      <% } %>
+    </li>
+  <% }) %>
+</ul>
+
+  </div>
+</body>
+</html>

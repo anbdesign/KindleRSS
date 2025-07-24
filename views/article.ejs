@@ -1,0 +1,31 @@
+<%- include('layout') %>
+
+<h1><%= article.title %></h1>
+
+<div class="article-meta">
+  <% if (article.pubDate) { %>
+    <strong>Published:</strong> <%= new Date(article.pubDate).toLocaleDateString() %>
+  <% } %>
+  <% if (article.creator) { %>
+    | <strong>By:</strong> <%= article.creator %>
+  <% } %>
+  <% if (article.link) { %>
+    | <strong>Original:</strong> <a href="<%= article.link %>" target="_blank">View Original</a>
+  <% } %>
+</div>
+
+<div class="article-content">
+  <% if (article.content) { %>
+    <%- article.content %>
+  <% } else if (article.contentSnippet) { %>
+    <p><%= article.contentSnippet %></p>
+  <% } %>
+</div>
+
+<div class="back-link">
+  <a href="/feed?url=<%= encodeURIComponent(feedUrl) %>">&larr; Back to <%= feedTitle %></a>
+</div>
+
+  </div>
+</body>
+</html>
