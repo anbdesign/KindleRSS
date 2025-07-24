@@ -17,14 +17,40 @@
 <div class="article-content">
   <% if (article.content) { %>
     <%- article.content %>
+  <% } else if (article['content:encoded']) { %>
+    <%- article['content:encoded'] %>
   <% } else if (article.contentSnippet) { %>
     <p><%= article.contentSnippet %></p>
+  <% } else if (article.description) { %>
+    <p><%= article.description %></p>
+  <% } else { %>
+    <p>No content available for this article.</p>
   <% } %>
 </div>
+
+<% if (article['media:keywords']) { %>
+<div class="article-tags">
+  <strong>Keywords:</strong> <%= article['media:keywords'] %>
+</div>
+<% } %>
+
+<% if (article.categories && article.categories.length > 0) { %>
+<div class="article-categories">
+  <strong>Categories:</strong> <%= article.categories.join(', ') %>
+</div>
+<% } %>
 
 <div class="back-link">
   <a href="/feed?url=<%= encodeURIComponent(feedUrl) %>">&larr; Back to <%= feedTitle %></a>
 </div>
+
+<!-- Debug information (only show in development) -->
+<% if (process.env.NODE_ENV !== 'production') { %>
+<div class="debug-info" style="margin-top: 30px; padding: 15px; background-color: #f0f0f0; border: 1px solid #ccc; font-size: 14px;">
+  <h3>Debug: Available RSS Fields</h3>
+  <pre><%= JSON.stringify(article, null, 2) %></pre>
+</div>
+<% } %>
 
   </div>
 </body>

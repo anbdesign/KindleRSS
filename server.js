@@ -59,7 +59,10 @@ function cleanRssContent(item) {
     cleanedItem.contentSnippet = decodeHtmlEntities(cleanedItem.contentSnippet);
   }
   
-  if (cleanedItem.content) {
+  // Priority order: content:encoded, content, contentSnippet
+  if (cleanedItem['content:encoded']) {
+    cleanedItem.content = decodeHtmlEntities(cleanedItem['content:encoded']);
+  } else if (cleanedItem.content) {
     cleanedItem.content = decodeHtmlEntities(cleanedItem.content);
   }
   
@@ -67,11 +70,24 @@ function cleanRssContent(item) {
     cleanedItem.creator = decodeHtmlEntities(cleanedItem.creator);
   }
   
+  // Handle dc:creator if creator is not available
+  if (!cleanedItem.creator && cleanedItem['dc:creator']) {
+    cleanedItem.creator = decodeHtmlEntities(cleanedItem['dc:creator']);
+  }
+  
   return cleanedItem;
 }
 
 const app = express();
-const parser = new Parser();
+const parser = new Parser({
+  customFields: {
+    item: [
+      'content:encoded',
+      'dc:creator',
+      'media:keywords'
+    ]
+  }
+});
 const cache = new NodeCache({ stdTTL: 300 }); // Cache for 5 minutes
 
 // Security and performance middleware
@@ -87,16 +103,22 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Routes
 app.get('/', (req, res) => {
-  res.render('index', { title: 'RSS Kindle Reader' });
+  const baseUrl = `${req.protocol}://${req.get('host')}`;
+  res.render('index', { 
+    title: 'RSS Kindle Reader',
+    baseUrl: baseUrl
+  });
 });
 
 app.get('/feed', async (req, res) => {
   const feedUrl = req.query.url;
+  const baseUrl = `${req.protocol}://${req.get('host')}`;
   
   if (!feedUrl) {
     return res.status(400).render('error', { 
       title: 'Error',
-      message: 'Please provide a feed URL' 
+      message: 'Please provide a feed URL',
+      baseUrl: baseUrl
     });
   }
 
@@ -119,13 +141,15 @@ app.get('/feed', async (req, res) => {
     res.render('feed', {
       title: `RSS Reader - ${feed.title}`,
       feed: feed,
-      feedUrl: feedUrl
+      feedUrl: feedUrl,
+      baseUrl: baseUrl
     });
   } catch (error) {
     console.error('Error parsing feed:', error);
     res.status(500).render('error', {
       title: 'Error',
-      message: 'Failed to parse RSS feed. Please check the URL and try again.'
+      message: 'Failed to parse RSS feed. Please check the URL and try again.',
+      baseUrl: baseUrl
     });
   }
 });

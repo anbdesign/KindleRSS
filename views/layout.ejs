@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <% if (typeof baseUrl !== 'undefined') { %>
+    <base href="<%= baseUrl %>/">
+  <% } %>
   <title><%= title %></title>
   <style>
     body {
@@ -149,6 +152,14 @@
       margin-top: 30px;
       padding-top: 20px;
       border-top: 1px solid #ccc;
+    }
+    
+    .article-tags, .article-categories {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border-left: 3px solid #000;
+      font-size: 16px;
     }
     
     /* Kindle-specific optimizations */
