@@ -103,16 +103,28 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Routes
 app.get('/', (req, res) => {
-  const baseUrl = `${req.protocol}://${req.get('host')}`;
+  // Force HTTP for local development, otherwise use request protocol
+  const host = req.get('host');
+  console.log('get / ', host)
+
+  const baseUrl = host.includes('localhost') || host.includes('127.0.0.1') || host.includes('continuum')
+    ? `http://${host}` 
+    : `${req.protocol}://${host}`;
+
+  console.log('baseUrl: ', baseUrl)
   res.render('index', { 
-    title: 'RSS Kindle Reader',
+    title: 'RSS Kindle Reader v1.6',
     baseUrl: baseUrl
   });
 });
 
 app.get('/feed', async (req, res) => {
   const feedUrl = req.query.url;
-  const baseUrl = `${req.protocol}://${req.get('host')}`;
+  // Force HTTP for local development, otherwise use request protocol
+  const host = req.get('host');
+  const baseUrl = host.includes('localhost') || host.includes('127.0.0.1') || host.includes('continuum')
+    ? `http://${host}` 
+    : `${req.protocol}://${host}`;
   
   if (!feedUrl) {
     return res.status(400).render('error', { 
@@ -157,7 +169,15 @@ app.get('/feed', async (req, res) => {
 app.get('/article/:feedUrl/:index', async (req, res) => {
   const { feedUrl, index } = req.params;
   const articleIndex = parseInt(index);
+  // Force HTTP for local development, otherwise use request protocol
+  const host = req.get('host');
+  const baseUrl = host.includes('localhost') || host.includes('127.0.0.1') || host.includes('continuum')
+    ? `http://${host}` 
+    : `${req.protocol}://${host}`;
   
+
+      console.log('/article/:feedUrl/:index - baseUrl: ', baseUrl)
+
   try {
     // Check cache first
     const cacheKey = `feed_${feedUrl}`;
@@ -179,7 +199,8 @@ app.get('/article/:feedUrl/:index', async (req, res) => {
     if (!article) {
       return res.status(404).render('error', {
         title: 'Error',
-        message: 'Article not found'
+        message: 'Article not found',
+        baseUrl: baseUrl
       });
     }
 
@@ -187,13 +208,15 @@ app.get('/article/:feedUrl/:index', async (req, res) => {
       title: article.title,
       article: article,
       feedTitle: feed.title,
-      feedUrl: feedUrl
+      feedUrl: feedUrl,
+      baseUrl: baseUrl
     });
   } catch (error) {
     console.error('Error fetching article:', error);
     res.status(500).render('error', {
       title: 'Error',
-      message: 'Failed to fetch article'
+      message: 'Failed to fetch article',
+      baseUrl: baseUrl
     });
   }
 });
