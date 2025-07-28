@@ -5,6 +5,9 @@ const helmet = require('helmet');
 const compression = require('compression');
 const path = require('path');
 
+// Load environment variables
+require('dotenv').config();
+
 // HTML entity decoding utility
 function decodeHtmlEntities(text) {
   if (!text) return text;
@@ -101,30 +104,34 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+// Get base URL from environment or construct from request
+function getBaseUrl(req) {
+  // Use BASE_URL environment variable if set
+  if (process.env.BASE_URL) {
+    return process.env.BASE_URL;
+  }
+  
+  // Fallback to constructing from request
+  const host = req.get('host');
+  // Force HTTP for local development, otherwise use request protocol
+  if (host.includes('localhost') || host.includes('127.0.0.1') || host.includes('continuum')) {
+    return `http://${host}`;
+  }
+  return `${req.protocol}://${host}`;
+}
+
 // Routes
 app.get('/', (req, res) => {
-  // Force HTTP for local development, otherwise use request protocol
-  const host = req.get('host');
-  console.log('get / ', host)
-
-  const baseUrl = host.includes('localhost') || host.includes('127.0.0.1') || host.includes('continuum')
-    ? `http://${host}` 
-    : `${req.protocol}://${host}`;
-
-  console.log('baseUrl: ', baseUrl)
+  const baseUrl = getBaseUrl(req);
   res.render('index', { 
-    title: 'RSS Kindle Reader v1.6',
+    title: 'RSS Kindle Reader v2.1',
     baseUrl: baseUrl
   });
 });
 
 app.get('/feed', async (req, res) => {
   const feedUrl = req.query.url;
-  // Force HTTP for local development, otherwise use request protocol
-  const host = req.get('host');
-  const baseUrl = host.includes('localhost') || host.includes('127.0.0.1') || host.includes('continuum')
-    ? `http://${host}` 
-    : `${req.protocol}://${host}`;
+  const baseUrl = getBaseUrl(req);
   
   if (!feedUrl) {
     return res.status(400).render('error', { 
@@ -169,15 +176,8 @@ app.get('/feed', async (req, res) => {
 app.get('/article/:feedUrl/:index', async (req, res) => {
   const { feedUrl, index } = req.params;
   const articleIndex = parseInt(index);
-  // Force HTTP for local development, otherwise use request protocol
-  const host = req.get('host');
-  const baseUrl = host.includes('localhost') || host.includes('127.0.0.1') || host.includes('continuum')
-    ? `http://${host}` 
-    : `${req.protocol}://${host}`;
+  const baseUrl = getBaseUrl(req);
   
-
-      console.log('/article/:feedUrl/:index - baseUrl: ', baseUrl)
-
   try {
     // Check cache first
     const cacheKey = `feed_${feedUrl}`;

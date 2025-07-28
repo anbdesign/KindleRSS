@@ -113,6 +113,27 @@ The application includes:
 
 - `PORT` - Server port (default: 3000)
 - `NODE_ENV` - Environment mode (production/development)
+- `BASE_URL` - Base URL for the application (optional)
+  - If not set, auto-detects from request
+  - Examples: `https://your-domain.com`, `http://localhost:3000`
+  - Useful for deployment behind proxies or custom domains
+
+### Configuration
+
+1. **Copy the example environment file:**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Edit the `.env` file with your settings:**
+   ```bash
+   # Example configuration
+   BASE_URL=https://your-domain.com
+   PORT=3000
+   NODE_ENV=production
+   ```
+
+This configuration ensures absolute URLs work correctly when switching between HTTP and HTTPS or when deployed behind reverse proxies.
 
 ### Contributing
 

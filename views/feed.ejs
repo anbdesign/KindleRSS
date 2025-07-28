@@ -16,7 +16,7 @@
   <% feed.items.forEach((item, index) => { %>
     <li class="article-item">
       <div class="article-title">
-        <a href="/article/<%= encodeURIComponent(feedUrl) %>/<%= index %>"><%= item.title %></a>
+        <a href="<%= baseUrl %>/article/<%= encodeURIComponent(feedUrl) %>/<%= index %>"><%= item.title %></a>
       </div>
       
       <div class="article-meta">

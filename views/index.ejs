@@ -2,7 +2,7 @@
 
 <h1><%= title %></h1>
 
-<form action="/feed" method="GET">
+<form action="<%= baseUrl %>/feed" method="GET">
   <div class="form-group">
     <label for="url">RSS Feed URL:</label>
     <input type="url" id="url" name="url" placeholder="https://example.com/feed.xml" required>
@@ -12,23 +12,23 @@
 
 <h2>Popular RSS Feeds</h2>
 <ul>
-  <li><a href="/feed?url=https://feeds.bbci.co.uk/news/rss.xml">BBC News</a></li>
-  <li><a href="/feed?url=https://rss.cnn.com/rss/edition.rss">CNN</a></li>
-  <li><a href="/feed?url=https://feeds.reuters.com/Reuters/worldNews">Reuters World News</a></li>
-  <li><a href="/feed?url=https://feeds.feedburner.com/TechCrunch">TechCrunch</a></li>
-  <li><a href="/feed?url=https://feeds.arstechnica.com/arstechnica/index">Ars Technica</a></li>
-  <li><a href="/feed?url=https://daringfireball.net/feeds/main">Daring Fireball</a></li>
-  <li><a href="/feed?url=https://www.raptitude.com/feed/">Raptitude</a></li>
-  <li><a href="/feed?url=https://morss.it/https://www.raptitude.com/feed/">Raptitude (MORSS)</a></li>
-  <li><a href="/feed?url=https://www.theverge.com/rss/partner/subscriber-only-full-feed/rss.xml">The Verge (Articles)</a></li>
-  <li><a href="/feed?url=https://www.theverge.com/rss/quickposts">The Verge (Quick Posts)</a></li>
-  <li><a href="/feed?url=https://arun.is/rss.xml">Arun.is</a></li>
-  <li><a href="/feed?url=https://stephango.com/feed.xml">Stephango</a></li>
-  <li><a href="/feed?url=https://feeds.kottke.org/main">Kottke.org</a></li>
-  <li><a href="/feed?url=https://wp.theringer.com/feed/">The Ringer</a></li>
-  <li><a href="/feed?url=https://www.techmeme.com/feed.xml">Techmeme</a></li>
-  <li><a href="/feed?url=https://feeds.feedblitz.com/sethsblog">Seth's Blog</a></li>
-  <li><a href="/feed?url=https://morss.it/https://news.ycombinator.com/rss">Hacker News</a></li>
+  <li><a href="<%= baseUrl %>/feed?url=https://feeds.bbci.co.uk/news/rss.xml">BBC News</a></li>
+  <li><a href="<%= baseUrl %>/feed?url=https://rss.cnn.com/rss/edition.rss">CNN</a></li>
+  <li><a href="<%= baseUrl %>/feed?url=https://feeds.reuters.com/Reuters/worldNews">Reuters World News</a></li>
+  <li><a href="<%= baseUrl %>/feed?url=https://feeds.feedburner.com/TechCrunch">TechCrunch</a></li>
+  <li><a href="<%= baseUrl %>/feed?url=https://feeds.arstechnica.com/arstechnica/index">Ars Technica</a></li>
+  <li><a href="<%= baseUrl %>/feed?url=https://daringfireball.net/feeds/main">Daring Fireball</a></li>
+  <li><a href="<%= baseUrl %>/feed?url=https://www.raptitude.com/feed/">Raptitude</a></li>
+  <li><a href="<%= baseUrl %>/feed?url=https://morss.it/https://www.raptitude.com/feed/">Raptitude (MORSS)</a></li>
+  <li><a href="<%= baseUrl %>/feed?url=https://www.theverge.com/rss/partner/subscriber-only-full-feed/rss.xml">The Verge (Articles)</a></li>
+  <li><a href="<%= baseUrl %>/feed?url=https://www.theverge.com/rss/quickposts">The Verge (Quick Posts)</a></li>
+  <li><a href="<%= baseUrl %>/feed?url=https://arun.is/rss.xml">Arun.is</a></li>
+  <li><a href="<%= baseUrl %>/feed?url=https://stephango.com/feed.xml">Stephango</a></li>
+  <li><a href="<%= baseUrl %>/feed?url=https://feeds.kottke.org/main">Kottke.org</a></li>
+  <li><a href="<%= baseUrl %>/feed?url=https://wp.theringer.com/feed/">The Ringer</a></li>
+  <li><a href="<%= baseUrl %>/feed?url=https://www.techmeme.com/feed.xml">Techmeme</a></li>
+  <li><a href="<%= baseUrl %>/feed?url=https://feeds.feedblitz.com/sethsblog">Seth's Blog</a></li>
+  <li><a href="<%= baseUrl %>/feed?url=https://morss.it/https://news.ycombinator.com/rss">Hacker News</a></li>
 </ul>
 
 <!-- <h2>Instructions</h2>

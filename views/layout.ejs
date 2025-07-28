@@ -3,9 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <% if (typeof baseUrl !== 'undefined') { %>
-    <base href="<%= baseUrl %>/">
-  <% } %>
   <title><%= title %></title>
   <style>
     body {
@@ -187,5 +184,5 @@
 <body>
   <div class="container">
     <div class="nav">
-      <a href="/">Home</a>
+      <a href="<%= baseUrl %>/">Home</a>
     </div>
