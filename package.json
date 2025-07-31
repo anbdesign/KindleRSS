@@ -1,6 +1,6 @@
 {
   "name": "rss-kindle-reader",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "A server-side RSS reader optimized for Kindle viewing",
   "main": "server.js",
   "scripts": {

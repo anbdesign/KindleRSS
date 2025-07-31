@@ -94,7 +94,24 @@ const parser = new Parser({
 const cache = new NodeCache({ stdTTL: 300 }); // Cache for 5 minutes
 
 // Security and performance middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      // connectSrc: ["'self'"],
+      connectSrc: ["'self'", "http:", "https:"], // This line fixes the issue
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+
+
+    },
+  },
+}));
 app.use(compression());
 
 // Serve static files
@@ -123,8 +140,17 @@ function getBaseUrl(req) {
 // Routes
 app.get('/', (req, res) => {
   const baseUrl = getBaseUrl(req);
-  res.render('index', { 
+  res.render('spa', { 
     title: 'RSS Kindle Reader v2.1',
+    baseUrl: baseUrl
+  });
+});
+
+// Legacy routes for backward compatibility
+app.get('/legacy', (req, res) => {
+  const baseUrl = getBaseUrl(req);
+  res.render('index', { 
+    title: 'RSS Kindle Reader v2.0',
     baseUrl: baseUrl
   });
 });
@@ -173,11 +199,16 @@ app.get('/feed', async (req, res) => {
   }
 });
 
-app.get('/article/:feedUrl/:index', async (req, res) => {
-  const { feedUrl, index } = req.params;
-  const articleIndex = parseInt(index);
-  const baseUrl = getBaseUrl(req);
+// API endpoints for SPA
+app.get('/api/feed', async (req, res) => {
+  const feedUrl = req.query.url;
   
+  if (!feedUrl) {
+    return res.status(400).json({ 
+      error: 'Please provide a feed URL'
+    });
+  }
+
   try {
     // Check cache first
     const cacheKey = `feed_${feedUrl}`;
@@ -185,6 +216,97 @@ app.get('/article/:feedUrl/:index', async (req, res) => {
     
     if (!feed) {
       feed = await parser.parseURL(feedUrl);
+      
+      // Clean the feed content
+      feed.title = decodeHtmlEntities(feed.title);
+      feed.description = decodeHtmlEntities(feed.description);
+      feed.items = feed.items.map(cleanRssContent);
+      
+      cache.set(cacheKey, feed);
+    }
+
+    res.json({
+      title: feed.title,
+      description: feed.description,
+      link: feed.link,
+      items: feed.items,
+      feedUrl: feedUrl
+    });
+  } catch (error) {
+    console.error('Error parsing feed:', error);
+    res.status(500).json({
+      error: 'Failed to parse RSS feed. Please check the URL and try again.'
+    });
+  }
+});
+
+app.get('/api/article/:feedUrl/:index', async (req, res) => {
+  const { feedUrl, index } = req.params;
+  const articleIndex = parseInt(index);
+  
+  // Decode the feed URL
+  const decodedFeedUrl = decodeURIComponent(feedUrl);
+  
+  console.log('Article request - Original feedUrl:', feedUrl);
+  console.log('Article request - Decoded feedUrl:', decodedFeedUrl);
+  console.log('Article request - Index:', index);
+  
+  try {
+    // Check cache first
+    const cacheKey = `feed_${decodedFeedUrl}`;
+    let feed = cache.get(cacheKey);
+    
+    if (!feed) {
+      console.log('Cache miss, fetching feed:', decodedFeedUrl);
+      feed = await parser.parseURL(decodedFeedUrl);
+      
+      // Clean the feed content
+      feed.title = decodeHtmlEntities(feed.title);
+      feed.description = decodeHtmlEntities(feed.description);
+      feed.items = feed.items.map(cleanRssContent);
+      
+      cache.set(cacheKey, feed);
+    } else {
+      console.log('Cache hit for feed:', decodedFeedUrl);
+    }
+
+    const article = feed.items[articleIndex];
+    
+    if (!article) {
+      console.log('Article not found at index:', articleIndex, 'Feed has', feed.items.length, 'items');
+      return res.status(404).json({
+        error: 'Article not found'
+      });
+    }
+
+    res.json({
+      article: article,
+      feedTitle: feed.title,
+      feedUrl: decodedFeedUrl
+    });
+  } catch (error) {
+    console.error('Error fetching article:', error);
+    res.status(500).json({
+      error: 'Failed to fetch article'
+    });
+  }
+});
+
+app.get('/article/:feedUrl/:index', async (req, res) => {
+  const { feedUrl, index } = req.params;
+  const articleIndex = parseInt(index);
+  const baseUrl = getBaseUrl(req);
+  
+  // Decode the feed URL
+  const decodedFeedUrl = decodeURIComponent(feedUrl);
+  
+  try {
+    // Check cache first
+    const cacheKey = `feed_${decodedFeedUrl}`;
+    let feed = cache.get(cacheKey);
+    
+    if (!feed) {
+      feed = await parser.parseURL(decodedFeedUrl);
       
       // Clean the feed content
       feed.title = decodeHtmlEntities(feed.title);
@@ -208,7 +330,7 @@ app.get('/article/:feedUrl/:index', async (req, res) => {
       title: article.title,
       article: article,
       feedTitle: feed.title,
-      feedUrl: feedUrl,
+      feedUrl: decodedFeedUrl,
       baseUrl: baseUrl
     });
   } catch (error) {
