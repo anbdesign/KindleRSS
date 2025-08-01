@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RSS Kindle Reader v2.1.1</title>
+  <title>RSS Kindle Reader v2.3</title>
   <style>
     body {
       font-family: "Times New Roman", serif;
@@ -202,7 +202,7 @@
     <div id="content">
       <!-- Home content -->
       <div id="home-content">
-        <h1>RSS Kindle Reader v2.1.1</h1>
+        <h1>RSS Kindle Reader v2.3</h1>
 
         <form id="feed-form">
           <div class="form-group">
@@ -242,7 +242,7 @@
       
       <!-- Article content -->
       <div id="article-content" class="hidden">
-        <div id="article-info"></div>
+        <div id="article-content-container"></div>
       </div>
       
       <!-- Loading indicator -->
@@ -316,25 +316,37 @@
     function loadFeedByUrl(feedUrl) {
       showLoading();
       
-      fetch('/api/feed?url=' + encodeURIComponent(feedUrl))
+      // Construct absolute URL using current protocol and host to ensure HTTP
+      const baseUrl = window.location.protocol + '//' + window.location.host;
+      const apiUrl = baseUrl + '/feed?url=' + encodeURIComponent(feedUrl);
+      console.log('DEBUG: Attempting to fetch HTML from:', apiUrl);
+      console.log('DEBUG: Current location:', window.location.href);
+      console.log('DEBUG: Protocol:', window.location.protocol);
+      console.log('DEBUG: Base URL:', baseUrl);
+      
+      fetch(apiUrl)
         .then(response => {
+          // DEBUG: Log response details
+          console.log('DEBUG: Response status:', response.status);
+          console.log('DEBUG: Response ok:', response.ok);
+          console.log('DEBUG: Response headers:', response.headers);
+          
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }
-          return response.json();
+          return response.text(); // Get HTML instead of JSON
         })
-        .then(data => {
-          if (data.error) {
-            showError(data.error);
-            return;
-          }
-          
-          currentFeed = data;
-          displayFeed(data);
+        .then(html => {
+          console.log('DEBUG: Received HTML length:', html.length);
+          displayFeedHtml(html, feedUrl);
         })
         .catch(error => {
-          console.error('Error:', error);
-          showError('Failed to load feed. Please check your connection and try again.');
+          // DEBUG: Enhanced error logging
+          console.error('DEBUG: Fetch error details:', error);
+          console.error('DEBUG: Error name:', error.name);
+          console.error('DEBUG: Error message:', error.message);
+          console.error('DEBUG: Error stack:', error.stack);
+          showError('Failed to load feed. Please check your connection and try again. Error: ' + error.message);
         });
     }
     
@@ -342,6 +354,72 @@
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
+    }
+    
+    function displayFeedHtml(html, feedUrl) {
+      // Parse the HTML to extract the main content
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      
+      // Extract the main content area
+      const mainContent = doc.querySelector('main') || doc.querySelector('.container') || doc.body;
+      
+      // Extract breadcrumb if present
+      const breadcrumbElement = doc.querySelector('#breadcrumb');
+      if (breadcrumbElement) {
+        document.getElementById('breadcrumb').innerHTML = breadcrumbElement.innerHTML;
+      }
+      
+      // Extract feed info and articles
+      const feedInfo = mainContent.querySelector('.feed-info') || mainContent.querySelector('h1').parentElement;
+      const articlesList = mainContent.querySelector('.articles') || mainContent.querySelector('ul');
+      
+      if (feedInfo) {
+        document.getElementById('feed-info').innerHTML = feedInfo.innerHTML;
+      }
+      
+      if (articlesList) {
+        document.getElementById('feed-articles').innerHTML = articlesList.outerHTML;
+        
+        // Add event listeners to article links in the new content
+        const articleLinks = document.querySelectorAll('#feed-articles a[href*="/article/"]');
+        articleLinks.forEach(link => {
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const href = this.getAttribute('href');
+            const match = href.match(/\/article\/([^\/]+)\/(\d+)/);
+            if (match) {
+              const encodedFeedUrl = match[1];
+              const articleIndex = parseInt(match[2]);
+              loadArticleHtml(decodeURIComponent(encodedFeedUrl), articleIndex);
+            }
+          });
+        });
+      } else {
+        // Fallback: use the entire main content
+        document.getElementById('feed-info').innerHTML = '';
+        document.getElementById('feed-articles').innerHTML = mainContent.innerHTML;
+        
+        // Add event listeners to any article links
+        const articleLinks = document.querySelectorAll('#feed-articles a[href*="/article/"]');
+        articleLinks.forEach(link => {
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const href = this.getAttribute('href');
+            const match = href.match(/\/article\/([^\/]+)\/(\d+)/);
+            if (match) {
+              const encodedFeedUrl = match[1];
+              const articleIndex = parseInt(match[2]);
+              loadArticleHtml(decodeURIComponent(encodedFeedUrl), articleIndex);
+            }
+          });
+        });
+      }
+      
+      // Store the current feed URL for navigation
+      currentFeed = { feedUrl: feedUrl };
+      
+      showContent('feed-content');
     }
     
     function displayFeed(feed) {
@@ -395,11 +473,44 @@
       document.getElementById('article-list').addEventListener('click', function(e) {
         if (e.target.tagName === 'A' && e.target.dataset.feedUrl && e.target.dataset.articleIndex) {
           e.preventDefault();
-          loadArticle(e.target.dataset.feedUrl, parseInt(e.target.dataset.articleIndex));
+          loadArticleHtml(e.target.dataset.feedUrl, parseInt(e.target.dataset.articleIndex));
         }
       });
       
       showContent('feed-content');
+    }
+    
+    function loadArticleHtml(feedUrl, index) {
+      console.log('Loading article HTML - feedUrl:', feedUrl, 'index:', index);
+      showLoading();
+      
+      const encodedUrl = encodeURIComponent(feedUrl);
+      const baseUrl = window.location.protocol + '//' + window.location.host;
+      const apiUrl = baseUrl + '/article/' + encodedUrl + '/' + index;
+      
+      console.log('DEBUG: Article HTML URL:', apiUrl);
+      console.log('DEBUG: Current location:', window.location.href);
+      console.log('DEBUG: Protocol:', window.location.protocol);
+      console.log('DEBUG: Base URL:', baseUrl);
+      
+      fetch(apiUrl)
+        .then(response => {
+          console.log('DEBUG: Article response status:', response.status);
+          console.log('DEBUG: Article response ok:', response.ok);
+          
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.text(); // Get HTML instead of JSON
+        })
+        .then(html => {
+          console.log('DEBUG: Article HTML length:', html.length);
+          displayArticleHtml(html, feedUrl);
+        })
+        .catch(error => {
+          console.error('DEBUG: Article fetch error:', error);
+          showError('Failed to load article. Please check your connection and try again. Error: ' + error.message);
+        });
     }
     
     function loadArticle(feedUrl, index) {
@@ -408,16 +519,25 @@
       
       const encodedUrl = encodeURIComponent(feedUrl);
       const apiUrl = '/api/article/' + encodedUrl + '/' + index;
-      console.log('API URL:', apiUrl);
+      
+      // DEBUG: Enhanced logging for article loading
+      console.log('DEBUG: Article API URL:', apiUrl);
+      console.log('DEBUG: Current location:', window.location.href);
+      console.log('DEBUG: Protocol:', window.location.protocol);
       
       fetch(apiUrl)
         .then(response => {
+          // DEBUG: Log response details
+          console.log('DEBUG: Article response status:', response.status);
+          console.log('DEBUG: Article response ok:', response.ok);
+          
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }
           return response.json();
         })
         .then(data => {
+          console.log('DEBUG: Article data received:', data);
           if (data.error) {
             showError(data.error);
             return;
@@ -426,9 +546,50 @@
           displayArticle(data);
         })
         .catch(error => {
-          console.error('Error:', error);
-          showError('Failed to load article. Please check your connection and try again.');
+          // DEBUG: Enhanced error logging
+          console.error('DEBUG: Article fetch error:', error);
+          console.error('DEBUG: Error type:', typeof error);
+          console.error('DEBUG: Error properties:', Object.keys(error));
+          showError('Failed to load article. Please check your connection and try again. Error: ' + error.message);
         });
+    }
+    
+    function displayArticleHtml(html, feedUrl) {
+      // Parse the HTML to extract the main content
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      
+      // Extract the main content area
+      const mainContent = doc.querySelector('main') || doc.querySelector('.container') || doc.body;
+      
+      // Extract breadcrumb if present
+      const breadcrumbElement = doc.querySelector('#breadcrumb');
+      if (breadcrumbElement) {
+        document.getElementById('breadcrumb').innerHTML = breadcrumbElement.innerHTML;
+        
+        // Add event listener to the "back to feed" link if it exists
+        const backToFeedLink = document.querySelector('#back-to-feed-link');
+        if (backToFeedLink) {
+          backToFeedLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentFeed) {
+              loadFeedByUrl(currentFeed.feedUrl);
+            }
+          });
+        }
+      }
+      
+      // Extract article content
+      const articleContent = mainContent.querySelector('.article') || mainContent;
+      
+      if (articleContent) {
+        document.getElementById('article-content-container').innerHTML = articleContent.innerHTML;
+      } else {
+        // Fallback: use the entire main content
+        document.getElementById('article-content-container').innerHTML = mainContent.innerHTML;
+      }
+      
+      showContent('article-content');
     }
     
     function displayArticle(data) {
@@ -477,7 +638,7 @@
       articleHtml += '<a href="#" id="back-to-feed-bottom">&larr; Back to ' + escapeHtml(feedTitle) + '</a>';
       articleHtml += '</div>';
       
-      document.getElementById('article-info').innerHTML = articleHtml;
+      document.getElementById('article-content-container').innerHTML = articleHtml;
       
       // Add event listeners for back links
       document.getElementById('back-to-feed-link').addEventListener('click', function(e) {
@@ -495,7 +656,7 @@
     
     function backToFeed() {
       if (currentFeed) {
-        displayFeed(currentFeed);
+        loadFeedByUrl(currentFeed.feedUrl);
       } else {
         showHome();
       }
