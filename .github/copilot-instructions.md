@@ -12,13 +12,14 @@ This is a Node.js RSS reader web application optimized for Kindle devices. The a
 - **Minimal client-side JavaScript**: Keep JavaScript to an absolute minimum
 
 ## Technical Stack
-- **Backend**: Node.js with Express.js
-- **Template Engine**: EJS for server-side rendering
+- **Runtime**: Cloudflare Workers (edge, serverless)
+- **Router/Framework**: Hono (Workers-native, replaces Express.js)
+- **Template Engine**: EJS bundled/inlined at build time (no filesystem access)
 - **RSS Parsing**: rss-parser library
-- **Caching**: node-cache for RSS feed caching
-- **Security**: helmet for security headers
-- **Performance**: compression middleware
-- **Containerization**: Docker with health checks
+- **Caching**: Cloudflare KV (replaces node-cache)
+- **Security**: Hono secure-headers middleware (replaces helmet)
+- **Performance**: Cloudflare edge network (replaces compression middleware)
+- **Deployment**: Wrangler CLI (replaces Docker)
 
 ## Design Principles
 - Use black text on white background for maximum contrast
