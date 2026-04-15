@@ -9,3 +9,8 @@ yarn-error.log*
 .env.production.local
 *.log
 .DS_Store
+
+# Wrangler / Cloudflare Workers
+.wrangler/
+.dev.vars
+dist/
