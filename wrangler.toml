@@ -1,7 +1,7 @@
 name = "rss-kindle-reader"
 main = "src/index.js"
 compatibility_date = "2024-09-23"
-node_compat = true
+compatibility_flags = ["nodejs_compat"]
 
 # KV namespace for RSS feed caching (5-minute TTL)
 # TODO: Once Cloudflare is set up, run:
@@ -13,8 +13,3 @@ binding = "RSS_CACHE"
 id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 preview_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
-# Import .ejs files as raw text strings so templates can be bundled
-# without filesystem access at runtime
-[[rules]]
-type = "Text"
-globs = ["**/*.ejs"]

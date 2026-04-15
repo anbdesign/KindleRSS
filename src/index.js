@@ -1,9 +1,8 @@
 import { Hono } from 'hono';
 import { secureHeaders } from 'hono/secure-headers';
-import ejs from 'ejs';
 import feedRoutes from './routes/feed.js';
 import articleRoutes from './routes/article.js';
-import spaTemplate from './templates/spa.ejs';
+import renderSpa from './templates/spa.js';
 
 const app = new Hono();
 
@@ -25,10 +24,7 @@ app.use(
 );
 
 // Home — SPA interface
-app.get('/', (c) => {
-  const html = ejs.render(spaTemplate, {});
-  return c.html(html);
-});
+app.get('/', (c) => c.html(renderSpa()));
 
 app.route('/', feedRoutes);
 app.route('/', articleRoutes);

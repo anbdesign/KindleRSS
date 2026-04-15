@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
 import { parseFeed } from '../utils.js';
 import { renderPage } from '../render.js';
-import articleTemplate from '../templates/article.ejs';
-import errorTemplate from '../templates/error.ejs';
+import renderArticle from '../templates/article.js';
+import renderError from '../templates/error.js';
 
 const article = new Hono();
 
@@ -15,11 +15,11 @@ article.get('/article/:feedUrl/:index', async (c) => {
     const articleItem = feed.items[articleIndex];
 
     if (!articleItem) {
-      const html = renderPage(errorTemplate, { title: 'Error', message: 'Article not found' });
+      const html = renderPage(renderError, { title: 'Error', message: 'Article not found' });
       return c.html(html, 404);
     }
 
-    const html = renderPage(articleTemplate, {
+    const html = renderPage(renderArticle, {
       title: articleItem.title,
       article: articleItem,
       feedTitle: feed.title,
@@ -27,7 +27,7 @@ article.get('/article/:feedUrl/:index', async (c) => {
     });
     return c.html(html);
   } catch (err) {
-    const html = renderPage(errorTemplate, { title: 'Error', message: 'Failed to fetch article' });
+    const html = renderPage(renderError, { title: 'Error', message: 'Failed to fetch article' });
     return c.html(html, 500);
   }
 });

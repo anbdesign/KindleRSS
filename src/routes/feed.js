@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
 import { parseFeed } from '../utils.js';
 import { renderPage } from '../render.js';
-import feedTemplate from '../templates/feed.ejs';
-import errorTemplate from '../templates/error.ejs';
+import renderFeed from '../templates/feed.js';
+import renderError from '../templates/error.js';
 
 const feed = new Hono();
 
@@ -10,20 +10,20 @@ feed.get('/feed', async (c) => {
   const feedUrl = c.req.query('url');
 
   if (!feedUrl) {
-    const html = renderPage(errorTemplate, { title: 'Error', message: 'Please provide a feed URL' });
+    const html = renderPage(renderError, { title: 'Error', message: 'Please provide a feed URL' });
     return c.html(html, 400);
   }
 
   try {
     const feedData = await parseFeed(feedUrl, c.env);
-    const html = renderPage(feedTemplate, {
+    const html = renderPage(renderFeed, {
       title: `RSS Reader - ${feedData.title}`,
       feed: feedData,
       feedUrl,
     });
     return c.html(html);
   } catch (err) {
-    const html = renderPage(errorTemplate, {
+    const html = renderPage(renderError, {
       title: 'Error',
       message: 'Failed to parse RSS feed. Please check the URL and try again.',
     });

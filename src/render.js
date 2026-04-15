@@ -1,9 +1,7 @@
-import ejs from 'ejs';
-import layoutTemplate from './templates/layout.ejs';
+import layout from './templates/layout.js';
 
-// Render a page template inside the shared layout.
-// The layout expects a `body` variable containing the rendered inner HTML.
-export function renderPage(template, data) {
-  const body = ejs.render(template, data);
-  return ejs.render(layoutTemplate, { ...data, body });
+// Render a page template function inside the shared layout.
+export function renderPage(templateFn, data) {
+  const body = templateFn(data);
+  return layout({ ...data, body });
 }

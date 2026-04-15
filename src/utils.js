@@ -6,6 +6,16 @@ const parser = new Parser({
   },
 });
 
+export function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export function decodeHtmlEntities(text) {
   if (!text) return text;
 

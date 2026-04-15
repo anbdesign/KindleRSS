@@ -1,4 +1,8 @@
-<h1><%= title %></h1>
+import { escapeHtml } from '../utils.js';
+
+export default function renderIndex({ title }) {
+  return `
+<h1>${escapeHtml(title)}</h1>
 
 <form action="/feed" method="GET">
   <div class="form-group">
@@ -27,4 +31,5 @@
   <li><a href="/feed?url=https://www.techmeme.com/feed.xml">Techmeme</a></li>
   <li><a href="/feed?url=https://feeds.feedblitz.com/sethsblog">Seth's Blog</a></li>
   <li><a href="/feed?url=https://morss.it/https://news.ycombinator.com/rss">Hacker News</a></li>
-</ul>
+</ul>`;
+}

@@ -1,9 +1,12 @@
-<!DOCTYPE html>
+import { escapeHtml } from '../utils.js';
+
+export default function layout({ title, body }) {
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %></title>
+  <title>${escapeHtml(title)}</title>
   <style>
     body {
       font-family: "Times New Roman", serif;
@@ -29,27 +32,17 @@
       padding-bottom: 10px;
     }
 
-    h2 {
-      font-size: 20px;
-    }
-
-    h3 {
-      font-size: 18px;
-    }
+    h2 { font-size: 20px; }
+    h3 { font-size: 18px; }
 
     a {
       color: #000000;
       text-decoration: underline;
     }
 
-    a:hover {
-      background-color: #f0f0f0;
-    }
+    a:hover { background-color: #f0f0f0; }
 
-    .container {
-      max-width: 100%;
-      margin: 0 auto;
-    }
+    .container { max-width: 100%; margin: 0 auto; }
 
     .nav {
       margin-bottom: 30px;
@@ -57,20 +50,11 @@
       border-bottom: 1px solid #ccc;
     }
 
-    .nav a {
-      margin-right: 20px;
-      font-weight: bold;
-    }
+    .nav a { margin-right: 20px; font-weight: bold; }
 
-    .form-group {
-      margin-bottom: 20px;
-    }
+    .form-group { margin-bottom: 20px; }
 
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
 
     input[type="url"] {
       width: 100%;
@@ -90,9 +74,7 @@
       cursor: pointer;
     }
 
-    button:hover {
-      background-color: #333333;
-    }
+    button:hover { background-color: #333333; }
 
     .error {
       color: #000000;
@@ -102,10 +84,7 @@
       margin: 20px 0;
     }
 
-    .article-list {
-      list-style: none;
-      padding: 0;
-    }
+    .article-list { list-style: none; padding: 0; }
 
     .article-item {
       margin-bottom: 20px;
@@ -113,30 +92,15 @@
       border-bottom: 1px solid #ccc;
     }
 
-    .article-title {
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
+    .article-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
 
-    .article-meta {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 10px;
-    }
+    .article-meta { font-size: 14px; color: #666; margin-bottom: 10px; }
 
-    .article-summary {
-      margin-bottom: 10px;
-    }
+    .article-summary { margin-bottom: 10px; }
 
-    .article-content {
-      line-height: 1.8;
-      margin-bottom: 20px;
-    }
+    .article-content { line-height: 1.8; margin-bottom: 20px; }
 
-    .article-content p {
-      margin-bottom: 15px;
-    }
+    .article-content p { margin-bottom: 15px; }
 
     .article-content img {
       max-width: 100%;
@@ -159,25 +123,11 @@
       font-size: 16px;
     }
 
-    /* Kindle-specific optimizations */
     @media (max-width: 600px) {
-      body {
-        font-size: 16px;
-        padding: 10px;
-      }
-
-      h1 {
-        font-size: 22px;
-      }
-
-      h2 {
-        font-size: 18px;
-      }
-
-      .nav a {
-        display: block;
-        margin: 10px 0;
-      }
+      body { font-size: 16px; padding: 10px; }
+      h1 { font-size: 22px; }
+      h2 { font-size: 18px; }
+      .nav a { display: block; margin: 10px 0; }
     }
   </style>
 </head>
@@ -186,7 +136,8 @@
     <div class="nav">
       <a href="/">Home</a>
     </div>
-    <%- body %>
+    ${body}
   </div>
 </body>
-</html>
+</html>`;
+}
